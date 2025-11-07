@@ -1,0 +1,8 @@
+dotenv~=0.9.9
+python-dotenv~=1.2.1
+torch~=2.6.0
+transformers~=4.49.0
+docx~=0.2.4
+pdfplumber~=0.11.7
+requests~=2.32.5
+openai~=2.7.1
