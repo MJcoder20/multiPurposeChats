@@ -23,9 +23,6 @@ CHATBOT_CHOICE_PROMPT = """
 # OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 # OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
 client = OpenAI()
-openai.api_key = \
-"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"
-
 
 # Function to get response from ChatGPT (or GPT-3.5/4)
 def chat_with_gpt(user_input):
