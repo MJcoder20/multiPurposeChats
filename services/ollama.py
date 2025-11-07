@@ -24,6 +24,7 @@ CHATBOT_CHOICE_PROMPT = """
 # OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
 client = OpenAI()
 
+
 # Function to get response from ChatGPT (or GPT-3.5/4)
 def chat_with_gpt(user_input):
     # response = client.responses.create(
