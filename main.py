@@ -21,7 +21,7 @@
 
 import streamlit as st
 
-from services.ollama import chat_with_gpt
+from services.ollama import chat_with_gpt, chat_with_gemini
 
 
 # from processing.fileProcessing import (
@@ -48,41 +48,55 @@ def main():
     st.write("We recommend a chatbot according to your intended use.")
 
     # To enter user's intended use text
-    uploaded = st.text_input("Write why you need a chatbot")
-    # To choose method of execution
-    choice = st.selectbox("Would you like to use a specific chatbot or a suggested one according to your use?",
-                          ["Suggested Chatbot", "Specific Chatbot"])
-    preferedChatbot = ""
-    if choice == "Specific":
-        # To choose the chatbot for execution in case the user has chosen the specific chatbot option
-        preferedChatbot = st.selectbox("Select a Chatbot",
-                                       ["Google Gemini", "Claude", "Copilot", "ChatGPT", "DeepSeek", "Perplexity",
-                                        "Jasper", "Grok"])
-    if preferedChatbot:
-        # Streamlit UI
-        st.title("Chat with ChatGPT")
-        st.markdown("Ask me anything!")
+    purposeOfUse = st.text_input("Write why you need a chatbot")
 
-        # Input box for the user
-        user_input = st.text_input("You:", "")
+    if purposeOfUse:
+        # To choose method of execution
+        choice = st.selectbox("Would you like to use a specific chatbot or a suggested one according to your use?",
+                              ["Suggested Chatbot", "Specific Chatbot"])
+        preferedChatbot = ""
+        if choice == "Specific Chatbot":
+            # To choose the chatbot for execution in case the user has chosen the specific chatbot option
+            preferedChatbot = st.selectbox("Select a Chatbot",
+                                           ["Google Gemini", "Claude", "Copilot", "ChatGPT", "DeepSeek", "Perplexity",
+                                            "Jasper", "Grok"])
+        if preferedChatbot == "ChatGPT":
+            # Streamlit UI
+            # st.title("Chat with ChatGPT")
+            # st.markdown("Ask me anything!")
 
-        # Display chat history
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+            # Input box for the user
+            # user_input = st.text_input("You:", "")
 
-        if user_input:
-            # Add user message to history
-            st.session_state.messages.append(f"You: {user_input}")
+            # Display chat history
+            if "messages" not in st.session_state:
+                st.session_state.messages = []
+
+            # if user_input:
+            #     # Add user message to history
+            #     st.session_state.messages.append(f"You: {user_input}")
 
             # Get response from ChatGPT
-            chatbot_response = chat_with_gpt(user_input)
-            st.session_state.messages.append(f"ChatGPT: {chatbot_response}")
+            chatbot_response = chat_with_gpt(purposeOfUse)
+            st.session_state.messages.append(f"ChatGPT: \n{chatbot_response}")
 
             # Display all chat history
             for message in st.session_state.messages:
                 st.write(message)
 
+        elif preferedChatbot == "Google Gemini":
+            # Display chat history
+            if "messages" not in st.session_state:
+                st.session_state.messages = []
 
+            image = ""
+            # Get response from Gemini
+            gemini_response = chat_with_gemini(purposeOfUse, image)
+            st.session_state.messages.append(f"Gemini: \n{gemini_response}")
+
+            # Display all chat history
+            for message in st.session_state.messages:
+                st.write(message)
 
 
     # resume_files = sl.file_uploader(
@@ -101,18 +115,18 @@ def main():
     #                                                             "PHD Degree", "None"])
 
     # Submit button
-    if sl.button("Process"):
-        with sl.spinner("Processing..."):
-            if uploaded:
+    if st.button("Process"):
+        with st.spinner("Processing..."):
+            if purposeOfUse:
                 try:
-                    # Validate job text
-                    if not job_text.strip():
-                        sl.error("The job description file is empty.")
+                    # Validate Purpose of Use text
+                    if not purposeOfUse.strip():
+                        st.error("The purpose of use field is empty.")
                         return
 
                     # Extract text from resumes
-                    sl.write("Extracting text from resumes...")
-                    resumes = []
+                    # st.write("Extracting text from resumes...")
+                    # resumes = []
                     # for f in resume_files:
                     #     if f.name.endswith(".pdf"):
                     #         text = extract_text_from_pdf(f)
@@ -157,16 +171,16 @@ def main():
                     # ]
 
                     # output the extracted features and cosine similarity for each resume
-                    sl.write("### Extracted Resume Features:")
-                    resumes_f = []
-                    i = 1
-                    for features, res in zip(resume_features, resumes):
-                        sl.write(f"Resume {i}:")
-                        sl.write(features)
-                        sl.write(f"Cosine Similarity: {res.similarity}")
-                        resume = f"Resume {i}: {features}\nCosine Similarity: {res.similarity}"
-                        resumes_f.append(resume)
-                        i = i + 1
+                    # sl.write("### Extracted Resume Features:")
+                    # resumes_f = []
+                    # i = 1
+                    # for features, res in zip(resume_features, resumes):
+                    #     sl.write(f"Resume {i}:")
+                    #     sl.write(features)
+                    #     sl.write(f"Cosine Similarity: {res.similarity}")
+                    #     resume = f"Resume {i}: {features}\nCosine Similarity: {res.similarity}"
+                    #     resumes_f.append(resume)
+                    #     i = i + 1
 
                     # # shortlist the resumes into top 5
                     # short = make_request(shortlist(RESUME_PROMPT2, resumes_f))
@@ -177,9 +191,9 @@ def main():
                     # sl.write(analysis)  # output analysis
 
                 except Exception as e:
-                    sl.error(f"An error occurred: {e}")
+                    st.error(f"An error occurred: {e}")
             else:
-                sl.warning("Please upload a job description and at least one resume.")
+                st.warning("Please upload the purpose of use.")
 
 
 if __name__ == "__main__":
