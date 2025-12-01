@@ -1,49 +1,11 @@
-# import streamlit as st
-# import requests
-#
-# # API_BASE = st.secrets.get("api_base", "http://backend:8000")  # docker compose friendly
-# st.title("Multi Purpose Chats")
-# st.write("We recommend a chatbot according to your intended use.")
-#
-# uploaded = st.text_field("Write why you need a chatbot")
-# # priority = st.selectbox("Task Priority", ["Top", "Average", "Low"])
-#
-# if uploaded is not None:
-#     if st.button("Process"):
-#         with st.spinner("Processing..."):
-#             r = requests.post(f"{API_BASE}", data=uploaded, timeout=600)
-#             if r.status_code != 200:
-#                 st.error(f"Error: {r.text}")
-#             else:
-#                 j = r.json()
-#                 st.success("Done!")
-
-
 import streamlit as st
+from PIL import Image
+from services.ollama import chat_with_deepseek, chat_with_gpt, chat_with_gemini, chat_with_grok
 
-from services.ollama import chat_with_gpt, chat_with_gemini
-
-
-# from processing.fileProcessing import (
-#     extract_text_from_pdf,
-#     extract_text_from_docx,
-# )
-# from services.ollama import (
-#     RESUME_PROMPT,
-#     RESUME_PROMPT2,
-#     RESUME_PROMPT3,
-#     make_request,
-#     extract_info,
-#     shortlist,
-#     final_analysis,
-# )
-# from embedding.embeddingGen import EmbeddingGenerator
-# from testing.test_File import test_pdfFile_parsing, test_docxFile_parsing, test_embedding, test_similarity, \
-#     test_threshold, \
-#     test_request, test_extraction, test_shortlisting, test_analysis
 
 
 def main():
+    st.set_page_config(page_title="Multi Purpose Chat", layout="wide")
     st.title("Multi Purpose Chat")
     st.write("We recommend a chatbot according to your intended use.")
 
@@ -58,62 +20,8 @@ def main():
         if choice == "Specific Chatbot":
             # To choose the chatbot for execution in case the user has chosen the specific chatbot option
             preferedChatbot = st.selectbox("Select a Chatbot",
-                                           ["Google Gemini", "Claude", "Copilot", "ChatGPT", "DeepSeek", "Perplexity",
-                                            "Jasper", "Grok"])
-        if preferedChatbot == "ChatGPT":
-            # Streamlit UI
-            # st.title("Chat with ChatGPT")
-            # st.markdown("Ask me anything!")
-
-            # Input box for the user
-            # user_input = st.text_input("You:", "")
-
-            # Display chat history
-            if "messages" not in st.session_state:
-                st.session_state.messages = []
-
-            # if user_input:
-            #     # Add user message to history
-            #     st.session_state.messages.append(f"You: {user_input}")
-
-            # Get response from ChatGPT
-            chatbot_response = chat_with_gpt(purposeOfUse)
-            st.session_state.messages.append(f"ChatGPT: \n{chatbot_response}")
-
-            # Display all chat history
-            for message in st.session_state.messages:
-                st.write(message)
-
-        elif preferedChatbot == "Google Gemini":
-            # Display chat history
-            if "messages" not in st.session_state:
-                st.session_state.messages = []
-
-            image = ""
-            # Get response from Gemini
-            gemini_response = chat_with_gemini(purposeOfUse, image)
-            st.session_state.messages.append(f"Gemini: \n{gemini_response}")
-
-            # Display all chat history
-            for message in st.session_state.messages:
-                st.write(message)
-
-
-    # resume_files = sl.file_uploader(
-    #     "Upload Resumes", type=["pdf", "docx"], accept_multiple_files=True
-    # )
-    #
-    # # User-defined criteria
-    # sl.write("### Evaluation Criteria")
-    # required_skills = sl.text_input(
-    #     "Required skills (comma-separated)", "Python, Machine Learning"
-    # )
-    # min_experience = sl.number_input(
-    #     "Minimum years of experience required", min_value=0, value=3
-    # )
-    # education_level = sl.selectbox("Required Education Level", ["Bachelor's Degree", "Master's Degree",
-    #                                                             "PHD Degree", "None"])
-
+                                           ["Google Gemini", "Claude", "Copilot", "ChatGPT", "DeepSeek", "Grok"])
+       
     # Submit button
     if st.button("Process"):
         with st.spinner("Processing..."):
@@ -123,6 +31,54 @@ def main():
                     if not purposeOfUse.strip():
                         st.error("The purpose of use field is empty.")
                         return
+                    if preferedChatbot == "ChatGPT":
+                        # Display chat history
+                        if "messages" not in st.session_state:
+                            st.session_state.messages = []
+
+                        # Get response from ChatGPT
+                        chatbot_response = chat_with_gpt(purposeOfUse)
+                        st.session_state.messages.append(f"ChatGPT: \n{chatbot_response}")
+
+                        # Display all chat history
+                        for message in st.session_state.messages:
+                            st.write(message)
+
+                    elif preferedChatbot == "Google Gemini":
+                        image_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+                        if image_file is not None:
+                            # Read image with PIL
+                            image = Image.open(image_file)
+                            # Show image
+                            st.image(image, caption="Uploaded Image", use_column_width=True)
+                            st.success("Image uploaded successfully!")
+
+                        # Display chat history
+                        if "messages" not in st.session_state:
+                            st.session_state.messages = []
+
+                        # Get response from Gemini
+                        gemini_response = chat_with_gemini(purposeOfUse, image_file)
+                        st.session_state.messages.append(f"Gemini: \n{gemini_response}")
+
+                        # Display all chat history
+                        for message in st.session_state.messages:
+                            st.write(message)
+
+                    elif preferedChatbot == "Grok":
+                        if "messages" not in st.session_state:
+                            st.session_state.messages= []
+                        grok_response = chat_with_grok(purposeOfUse)
+                        st.session_state.messages.append(f"Grok: \n{grok_response}")
+                        for message in st.session_state.messages:
+                            st.write(message)
+                    elif preferedChatbot == "DeepSeek":
+                        if "messages" not in st.session_state:
+                            st.session_state.messages = []
+                        deepseek_response = chat_with_deepseek(purposeOfUse)
+                        st.session_state.messages.append(f"DeepSeek: \n{deepseek_response}")
+                        for message in st.session_state.messages:
+                            st.write(message)
 
                     # Extract text from resumes
                     # st.write("Extracting text from resumes...")

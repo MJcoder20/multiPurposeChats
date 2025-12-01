@@ -18,11 +18,34 @@ CHATBOT_CHOICE_PROMPT = f"""
         Jasper focuses heavily on helping marketers with content creation, especially for SEO and copywriting.
 """
 
+CHATBOT_PROMPT = f"""
+Task / Specialization	        Suggested LLM (free/open-source)	            Why It’s a Good Fit
+
+
+💻 Code generation 
+& programming assistance	    Code Llama	                            Code Llama is explicitly built for code tasks (completion, infilling, multi-language code, etc.), and among open-models it achieves state-of-the-art on code benchmarks. 
+
+🧠 General reasoning, 
+logic, long-form content, 
+multi-purpose chat/assistant	Qwen3 (or its MoE variants)	            Qwen3’s Mixture-of-Experts architecture gives high reasoning and general-purpose performance with efficient resource usage, and supports long context windows which help with complex tasks. 
+
+✍️ Creative writing, 
+storytelling, 
+content generation, 
+light-weight usage	            GPT‑J (or its smaller relatives)	    GPT-J is lighter and more accessible for smaller hardware but still produces reasonably fluent, coherent text — good for writing, drafts, creative content, simple generation. 
+
+🌐 Multilingual content 
+generation/multilingual tasks   	    BLOOM	                        BLOOM was trained to work across many languages (40+ natural languages, many programming ones too), making it very versatile for multilingual text generation or translation-heavy tasks. 
+
+🔬 Math, reasoning, 
+domain-specific reasoning 
+(e.g. research, 
+structured reasoning, logical tasks)	Baichuan 2	                    Baichuan 2 shows good performance on benchmarks involving reasoning, domain-specific knowledge (like STEM, law, etc.), making it a strong free candidate when you need more “serious” reasoning muscle. 
+
+"""
+
 load_dotenv()
-# API_URL = os.getenv("API_URL")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-# OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
-# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 # Function to get response from ChatGPT (or GPT-3.5/4)
@@ -81,8 +104,67 @@ def chat_with_gpt(user_input):
     else:
         return f"Error: {response_json.get('error', 'Unexpected response format')}"
 
+def chat_with_grok(user_input):
+    # First API call with reasoning
+    response = requests.post(
+        url="https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        data=json.dumps({
+            "model": "x-ai/grok-4.1-fast:free",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": user_input
+                }
 
-def chat_with_gemini(user_input, image):
+            ], "reasoning": {"enabled": True}
+        })
+    )
+
+    # Extract the assistant message with reasoning_details
+    # response = response.json()
+    # response = response['choices'][0]['message']
+
+    response_json = response.json()
+    if "choices" in response_json:
+        return response_json["choices"][0]["message"]["content"]
+    else:
+        return f"Error: {response_json.get('error', 'Unexpected response format')}"
+
+def chat_with_deepseek(user_input):
+    # First API call with reasoning
+    response = requests.post(
+        url="https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        data=json.dumps({
+            "model": "tngtech/deepseek-r1t2-chimera:free",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": user_input
+                }
+
+            ],
+        })
+    )
+
+    # Extract the assistant message with reasoning_details
+    # response = response.json()
+    # response = response['choices'][0]['message']
+
+    response_json = response.json()
+    if "choices" in response_json:
+        return response_json["choices"][0]["message"]["content"]
+    else:
+        return f"Error: {response_json.get('error', 'Unexpected response format')}"
+
+def chat_with_gemini(user_input, image=""):
     response = requests.post(
         url="https://openrouter.ai/api/v1/chat/completions",
         headers={
